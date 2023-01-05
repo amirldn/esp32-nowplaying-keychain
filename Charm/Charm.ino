@@ -16,13 +16,15 @@ BLEUUID entityAttributeUUID("C6B2F38C-23AB-46D8-A6AB-A3A870BBD5D7");
 
 bool bleServerConnected = false;
 bool bleClientConnected = false;
+std::string fakeaddr = "00:00:00:00:00:00";
+BLEAddress serverConnectedAddress = fakeaddr;
 
 class ServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {
     Serial.println("Client connected");
     bleServerConnected = true;
-    BLEAddress address = BLEDevice::getAddress();
-    Serial.println(address.toString().c_str());
+    BLEAddress serverConnectedAddress = BLEDevice::getAddress();
+    Serial.println(serverConnectedAddress.toString().c_str());
   }
 };
 
@@ -32,14 +34,17 @@ void setup()
   Serial.println("Starting!");
   BLEDevice::init(BT_NAME);
   startBLEServer();
+  while (!bleServerConnected) {
+    delay(2000);
+  }
+  Serial.println("Server connected, starting client");
+  startBLEClient();
 }
 
 void startBLEServer()
 {
-  Serial.println("Beginning startBLEServer");
-  
-
   // Create the BLE Server
+  Serial.println("Beginning startBLEServer");
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
 
@@ -63,11 +68,26 @@ void startBLEClient()
   Serial.println("Beginning startBLEServer");
   BLEClient *pClient = BLEDevice::createClient();
   Serial.println("Created client");
-}
+  pClient->connect(serverConnectedAddress);
+  if (pClient->isConnected()) {
+    Serial.println("Connected to client");
+    Serial.println(pClient->toString())
+  }
+  else {
+    Serial.println("Did not connect to client")
+  }
+  
+  std::map<std::string, BLERemoteService*>* pServices = pClient->getServices();
+  for (auto& service : *pServices) {
+    std::map<std::string, BLERemoteCharacteristic*>* pCharacteristics = service.second->getCharacteristics();
+    for (auto& characteristic : *pCharacteristics) {
+      // Do something with the characteristic
+     Serial.println(characteristic.second->getUUID().toString().c_str()); 
+    }
+  }
 
-// void onHIDConnect {
-//   BLEDevice::getAddress()
-// }
+
+}
 
 void loop() {
   delay(2000);
