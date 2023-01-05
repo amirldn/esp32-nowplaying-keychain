@@ -2,6 +2,8 @@
 #include "BLEServer.h"
 #include "BLEClient.h"
 
+#define BT_NAME "AmirBLETest"
+
 // Service UUIDs
 BLEUUID keyboardUUID("00001812-0000-1000-8000-00805f9b34fb");
 BLEUUID amsUUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC");
@@ -12,20 +14,40 @@ BLEUUID entityUpdateUUID("2F7CABCE-808D-411F-9A0C-BB92BA96C102");
 BLEUUID entityAttributeUUID("C6B2F38C-23AB-46D8-A6AB-A3A870BBD5D7");
 
 
+bool bleServerConnected = false;
+bool bleClientConnected = false;
+
+class ServerCallbacks: public BLEServerCallbacks {
+  void onConnect(BLEServer* pServer) {
+    Serial.println("Client connected");
+    bleServerConnected = true;
+    BLEAddress address = BLEDevice::getAddress();
+    Serial.println(address.toString().c_str());
+  }
+};
+
 void setup()
 {
   Serial.begin(115200);
   Serial.println("Starting!");
+  BLEDevice::init(BT_NAME);
   startBLEServer();
+  
+
+
+
+  
+  
 }
 
 void startBLEServer()
 {
   Serial.println("Beginning startBLEServer");
-  BLEDevice::init("AmirBLETest");
+  
 
   // Create the BLE Server
   BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new ServerCallbacks());
 
   // Create the BLE Service
   BLEService *pService = pServer->createService(keyboardUUID);
@@ -35,18 +57,18 @@ void startBLEServer()
 
   // Start advertising the service
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-
-  // BLEAdvertisementData *pAdvertisementData = new BLEAdvertisementData();
-  // pAdvertisementData->setFlags(0x06);
-  // pAdvertisementData->setCompleteServices(BLEUUID(keyboardUUID));
-  // pAdvertising->setAdvertisementData(*pAdvertisementData);
-  
   pAdvertising->addServiceUUID(keyboardUUID);
   pAdvertising->setScanResponse(true);
   pAdvertising->setMinPreferred(0x06);  
   BLEDevice::startAdvertising();
   Serial.println("Service has started");
-  
+}
+
+void startBLEClient()
+{
+  Serial.println("Beginning startBLEServer");
+  BLEClient *pClient = BLEDevice::createClient();
+  Serial.println("Created client");
 }
 
 // void onHIDConnect {
