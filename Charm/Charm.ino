@@ -71,10 +71,11 @@ void startBLEClient()
   pClient->connect(serverConnectedAddress);
   if (pClient->isConnected()) {
     Serial.println("Connected to client");
-    Serial.println(pClient->toString())
+    std::string output = pClient->toString();
+    Serial.println(output.c_str());
   }
   else {
-    Serial.println("Did not connect to client")
+    Serial.println("Did not connect to client");
   }
   
   std::map<std::string, BLERemoteService*>* pServices = pClient->getServices();
