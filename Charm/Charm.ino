@@ -2,47 +2,48 @@
 #include "BLEServer.h"
 #include "BLEClient.h"
 
+// Service UUIDs
+BLEUUID keyboardUUID("00001812-0000-1000-8000-00805f9b34fb");
+BLEUUID amsUUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC");
+
+// Characteristic UUIDs
+BLEUUID remoteCommandUUID("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2");
+BLEUUID entityUpdateUUID("2F7CABCE-808D-411F-9A0C-BB92BA96C102");
+BLEUUID entityAttributeUUID("C6B2F38C-23AB-46D8-A6AB-A3A870BBD5D7");
+
+
 void setup()
 {
   Serial.begin(115200);
   Serial.println("Starting!");
-  startBLE();
+  startBLEServer();
 }
 
-void startBLE()
+void startBLEServer()
 {
-  Serial.println("Beginning startBLE");
+  Serial.println("Beginning startBLEServer");
   BLEDevice::init("AmirBLETest");
 
   // Create the BLE Server
   BLEServer *pServer = BLEDevice::createServer();
 
   // Create the BLE Service
-
-  // AMS GUID (did not display in settings)
-  // BLEUUID serviceUUID("89D3502B-0F36-433A-8EF4-C502AD55F8DC");
-
-  // HID Keyboard GUID
-  BLEUUID serviceUUID("00001812-0000-1000-8000-00805f9b34fb");
-  BLEService *pService = pServer->createService(serviceUUID);
+  BLEService *pService = pServer->createService(keyboardUUID);
 
   // Start the service
   pService->start();
 
-
-
   // Start advertising the service
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
 
-  BLEAdvertisementData *pAdvertisementData = new BLEAdvertisementData();
-  pAdvertisementData->setFlags(0x06);
-  pAdvertisementData->setCompleteServices(BLEUUID(serviceUUID));
-  pAdvertising->setAdvertisementData(*pAdvertisementData);
+  // BLEAdvertisementData *pAdvertisementData = new BLEAdvertisementData();
+  // pAdvertisementData->setFlags(0x06);
+  // pAdvertisementData->setCompleteServices(BLEUUID(keyboardUUID));
+  // pAdvertising->setAdvertisementData(*pAdvertisementData);
   
-  pAdvertising->addServiceUUID(serviceUUID);
+  pAdvertising->addServiceUUID(keyboardUUID);
   pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  // pAdvertising->setMinPreferred(0x12);
+  pAdvertising->setMinPreferred(0x06);  
   BLEDevice::startAdvertising();
   Serial.println("Service has started");
   
