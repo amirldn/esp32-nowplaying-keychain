@@ -32,12 +32,6 @@ void setup()
   Serial.println("Starting!");
   BLEDevice::init(BT_NAME);
   startBLEServer();
-  
-
-
-
-  
-  
 }
 
 void startBLEServer()
